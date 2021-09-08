@@ -305,12 +305,12 @@ const bankDetails = async(req,res,next) => {
         const error =  new HttpError("invalid input are passed,please pass valid data",422)
         return next(error)
     }
-    const { accountNumber , bankName, swiftCode } = req.body;
-    const userId = req.userData.userId;
+    const { accountNumber , bankName, swiftCode , email} = req.body;
+    // const userId = req.userData.userId;
 
     let merchant
     try{
-         merchant = await Merchant.findOne({ _id : userId  })
+         merchant = await Merchant.findOne({ email : email  })
     }
     catch(err){
         const error = await new HttpError("something went wrong, in failed",500)
@@ -326,7 +326,7 @@ const bankDetails = async(req,res,next) => {
     let user
     try {
      user = await Merchant.updateOne(
-        { _id: userId },
+        { email: email },
         {
           accountNumber, 
           bankName,
@@ -368,10 +368,11 @@ const getRemainingBalance = async(req,res ,next) => {
 
 //get Merchant Bank Details
 const getMerchantBankDetails = async(req,res ,next) => {
-    const userId = req.userData.userId;
+   // const userId = req.userData.userId;
+   const userEmail = req.params.id;
     let merchant
     try{
-         merchant = await Merchant.findOne({ _id : userId  })
+         merchant = await Merchant.findOne({ email : userEmail  })
     }
     catch(err){
         const error = await new HttpError("something went wrong, request failed",500)
@@ -379,7 +380,7 @@ const getMerchantBankDetails = async(req,res ,next) => {
     }
 
     if(!merchant){
-        const error = new HttpError("merchant not found could not get remaing balance",401)
+        const error = new HttpError("merchant not found could not get bank details",401)
         return next(error)
     }
 
@@ -393,19 +394,42 @@ const getMerchantBankDetails = async(req,res ,next) => {
 
 //profile updated 
 const updateMerchantProfile = async (req,res,next) => {
-    const userId = req.userData.userId;
-    const { accountNumber, bankName, swiftCode  } = req.body;
-     
+
+    let SingleFilePath ;
+    let imgPath ;
+  
+    const fileSingle = req.files.image;
+  
+    console.log(fileSingle)
+  
+    if(!fileSingle){
+        const error = new Error("please single choose files");
+        return next(error)
+      }
+      
+      fileSingle.forEach(img => {
+        console.log(img.path)
+         imgPath = img.path;
+         SingleFilePath = imgPath
+      })
+
+    //const userEmail = req.params.id;
+
+    // const userId = req.userData.userId;
+    const { accountNumber, bankName, swiftCode  , email } = req.body;
+    
+    console.log("gmail", email)
+
     let existingUser
     try{
-         existingUser = await Merchant.findOne({ _id : userId })
+         existingUser = await Merchant.findOne({ email: email })
     }
     catch(err){
         const error = await new HttpError("something went wrong, updating failed",500)
         return next(error)
     }
     if(!existingUser){
-        const error = new HttpError("user not exists",422)
+        const error = new HttpError("usver not exists",422)
         return next(error)
     }
 
@@ -413,12 +437,12 @@ const updateMerchantProfile = async (req,res,next) => {
       let user
       try {
        user = await Merchant.updateOne(
-          { _id: userId },
+          { email: email },
           {
             accountNumber, 
             bankName,
             swiftCode ,
-            profilePic : req.file.path 
+            profilePic : SingleFilePath
           }
         );
       }

@@ -8,9 +8,11 @@ const HttpError = require('./models/http-error')
 
 const homepageRoutes = require('./routes/home-routes')
 
-//merchanchantRoutes
-const merchantPageRoutes = require('./routes/merchant-routes')
+const path = require('path'); 
 
+
+//customerPageRoutes
+const merchantPageRoutes = require('./routes/merchant-routes')
 //customerPageRoutes
 const customerPageRoutes = require('./routes/customer-routes')
 
@@ -31,6 +33,9 @@ app.use((req, res, next) => {
 });
 
 
+// set public directory to serve static html files 
+app.use('/public', express.static(path.join(__dirname, 'public'))); 
+
 
 
 app.use(homepageRoutes);
@@ -39,7 +44,7 @@ app.use(homepageRoutes);
 app.use('/api/merchant/', merchantPageRoutes);
 
 //customer Routes
-app.use('/api/customer/',customerPageRoutes);
+app.use('/api/customer/', customerPageRoutes);
 
 app.use((req, res, next)=>{
     const error = new HttpError('could not found this Route', 404);

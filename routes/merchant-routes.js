@@ -8,6 +8,7 @@ const merchantController = require('../controllers/merchant-controller')
 const fileUpload =require('../middleware/fileUpload')
 
 const checkAuth = require('../middleware/authService');
+const multiFileUpload = require('../middleware/multiFile-upload');
 
 router.get('/', (req, res, next) => {
  
@@ -20,7 +21,7 @@ router.post('/signup',
 [ check('name').not().isEmpty(),
   check('email').isEmail(),
   check('password').isLength({ min : 6}),
-  check('countryCode').isLength({min :2 , max:2}),
+  check('countryCode').isLength({min :2 , max:4}),
   check('businessName').not().isEmpty()
   
 ],merchantController.createMerchant);
@@ -41,16 +42,18 @@ router.post('/forgetPassword' ,[ check('email').isEmail()], merchantController.f
 router.post('/resetPasswordLink/:token', merchantController.newPasswordReset);
 
 // Reciveng BankDetails Of Merchant
-router.post('/bankDetails', checkAuth , [ check('accountNumber').not().isEmpty(),check('swiftCode').not().isEmpty(),check('bankName').not().isEmpty()] ,merchantController.bankDetails)
+router.post('/bankDetails', [ check('accountNumber').not().isEmpty(),check('swiftCode').not().isEmpty(),check('bankName').not().isEmpty()] ,merchantController.bankDetails)
 
 //Remaing Balance
 router.get('/remainingBalance', checkAuth ,merchantController.getRemainingBalance);
 
 //get merchant bank Details
-router.get('/getMerchantBankDetails',checkAuth ,merchantController.getMerchantBankDetails);
+router.get('/getMerchantBankDetails/:id',merchantController.getMerchantBankDetails);
 
 //update merchant profile
-router.post('/profile',checkAuth ,fileUpload.single('profilePic'), merchantController.updateMerchantProfile);
+router.post('/profile' ,multiFileUpload.fields([{
+  name: 'image', maxCount: 1
+}]), merchantController.updateMerchantProfile);
 
 //get full merchant details 
 router.get('/completeProfile', checkAuth ,merchantController.getCompleteMerchantDetails);

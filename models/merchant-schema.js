@@ -8,7 +8,7 @@ const merchantSchema = new Schema({
     email: { type: String, required: true , unique : true},
     password: { type: String , required: true},
     businessName :{ type :String, required : true },
-    countryCode : {type : Number, required : true},
+    countryCode : {type :Number, required : true},
     phoneNumber : { type : Number, required : true},
     resetToken:{ type:String },
     expireToken:{ type:Date },
