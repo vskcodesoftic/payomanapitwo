@@ -464,7 +464,7 @@ const updateMerchantProfile = async (req,res,next) => {
    
 }
 
-
+//images api
 // get complete merchant details 
 const getCompleteMerchantDetails = async (req, res, next) => {
    const userId = req.userId;
