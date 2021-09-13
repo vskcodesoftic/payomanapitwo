@@ -1,16 +1,21 @@
 const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
+   
     try {
-        const token = req.headers.authorization.split(" ")[1];
-        const decoded = jwt.verify(token, process.env.JWT_KEY);
-        req.userData = decoded;
-        console.log(req.userData.email);
-        next();
-    } catch (error) {
-      console.log(error)
-        return res.status(401).json({
-            message: 'Auth failed'
-        });
+        const accessToken = req.header('Authorization').replace('Bearer ', '')
+        const decoded = jwt.verify(accessToken, process.env.JWT_KEY)
+        // const user = await User.findOne( { _id: decoded._id, 'tokens.accessToken': accessToken})
+
+        const user = decoded;
+        if (!user) {
+            throw new Error()
+        }
+        req.token = accessToken
+        req.user = user
+        req.userId = user.userId
+        next()
+    } catch (e) {
+        res.status(401).send({error: 'Please authenticate.'})
     }
 };

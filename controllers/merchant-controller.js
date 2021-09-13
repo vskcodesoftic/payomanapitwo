@@ -140,7 +140,7 @@ try{
       userId : merchant.id,
       email : merchant.email },
       process.env.JWT_KEY,
-      {expiresIn :'1h'}
+      {expiresIn :'1100h'}
       )
 
 }
@@ -394,12 +394,11 @@ const getMerchantBankDetails = async(req,res ,next) => {
 
 //profile updated 
 const updateMerchantProfile = async (req,res,next) => {
-
     let SingleFilePath ;
     let imgPath ;
-  
+    console.log("image work", "image")
+
     const fileSingle = req.files.image;
-  
     console.log(fileSingle)
   
     if(!fileSingle){
@@ -415,8 +414,9 @@ const updateMerchantProfile = async (req,res,next) => {
 
     //const userEmail = req.params.id;
 
-    // const userId = req.userData.userId;
-    const { accountNumber, bankName, swiftCode  , email } = req.body;
+    // const userId = req.userId;
+   // console.log("userid",userId)
+    const { accountNumber, bankName,businessName, name ,swiftCode  , email ,phoneNumber } = req.body;
     
     console.log("gmail", email)
 
@@ -439,9 +439,12 @@ const updateMerchantProfile = async (req,res,next) => {
        user = await Merchant.updateOne(
           { email: email },
           {
+            businessName,
             accountNumber, 
             bankName,
             swiftCode ,
+            name,
+            phoneNumber,
             profilePic : SingleFilePath
           }
         );
@@ -464,7 +467,8 @@ const updateMerchantProfile = async (req,res,next) => {
 
 // get complete merchant details 
 const getCompleteMerchantDetails = async (req, res, next) => {
-    const userId = req.userData.userId;
+   const userId = req.userId;
+
     let merchant
     try{
          merchant = await Merchant.findOne({ _id : userId })

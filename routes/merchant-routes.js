@@ -51,11 +51,11 @@ router.get('/remainingBalance', checkAuth ,merchantController.getRemainingBalanc
 router.get('/getMerchantBankDetails/:id',merchantController.getMerchantBankDetails);
 
 //update merchant profile
-router.post('/profile' ,multiFileUpload.fields([{
+router.post('/profile' , multiFileUpload.fields([{
   name: 'image', maxCount: 1
 }]), merchantController.updateMerchantProfile);
 
 //get full merchant details 
-router.get('/completeProfile', checkAuth ,merchantController.getCompleteMerchantDetails);
+router.get('/completeProfile',checkAuth ,merchantController.getCompleteMerchantDetails);
 
 module.exports = router;
