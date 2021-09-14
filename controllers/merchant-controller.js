@@ -401,16 +401,6 @@ const updateMerchantProfile = async (req,res,next) => {
     const fileSingle = req.files.image;
     console.log(fileSingle)
   
-    if(!fileSingle){
-        const error = new Error("please single choose files");
-        return next(error)
-      }
-      
-      fileSingle.forEach(img => {
-        console.log(img.path)
-         imgPath = img.path;
-         SingleFilePath = imgPath
-      })
 
     //const userEmail = req.params.id;
 
@@ -433,6 +423,26 @@ const updateMerchantProfile = async (req,res,next) => {
         return next(error)
     }
 
+    const userImage =  await existingUser.profilePic;
+    console.log(userImage)
+    
+    if(!userImage){
+        const error = new Error("please single choose files");
+        return next(error)
+      }
+
+      if(!fileSingle) {
+        SingleFilePath = userImage
+      }
+
+      if(fileSingle) {
+
+      fileSingle.forEach(img => {
+        console.log(img.path)
+         imgPath = img.path;
+         SingleFilePath = imgPath
+      })
+    }
       //updating
       let user
       try {
