@@ -511,6 +511,37 @@ const getCompleteMerchantDetails = async (req, res, next) => {
     res.json({ message : " complete details of merchant", name : merchant.name, email : merchant.email , businessName : merchant.businessName, countryCode : merchant.countryCode , phoneNumber : merchant.phoneNumber , accountNumber : merchant.accountNumber, swiftCode :merchant.swiftCode ,bankName : merchant.bankName , profilePic : merchant.profilePic})
 }
 
+
+
+//get list of payments 
+const getListofPayments = async (req , res ,next) => {
+
+    const userId = req.userId;
+
+    let userWithPayments;
+    try {
+      userWithPayments = await Merchant.findById(userId).populate('payments');
+    } catch (err) {
+      const error = new HttpError(
+        'Fetching Payments failed, please try again later',
+        500
+      );
+      return next(error);
+    }
+    // if (!payments || payments.length === 0) {
+    if (!userWithPayments || userWithPayments.payments.length === 0) {
+      return next(
+        new HttpError('Could not find payments for the provided user id.', 404)
+      );
+    }
+  
+    res.json({
+      payments: userWithPayments.payments.map(payment =>
+        payment.toObject({ getters: true })
+      )
+    });
+}
+
 exports.createMerchant =    createMerchant;
 exports.merchantLogin = merchantLogin;
 exports.updateMerchantPassword = updateMerchantPassword;
@@ -521,3 +552,4 @@ exports.getRemainingBalance = getRemainingBalance;
 exports.getMerchantBankDetails = getMerchantBankDetails;
 exports.updateMerchantProfile = updateMerchantProfile;
 exports.getCompleteMerchantDetails = getCompleteMerchantDetails;
+exports.getListofPayments = getListofPayments;

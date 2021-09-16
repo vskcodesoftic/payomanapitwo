@@ -475,6 +475,37 @@ catch(err){
 
 
 
+//get list of payments 
+const getListofPayments = async (req , res ,next) => {
+
+    const userId = req.userId;
+
+    let userWithPayments;
+    try {
+      userWithPayments = await Customer.findById(userId).populate('payments');
+    } catch (err) {
+      const error = new HttpError(
+        'Fetching Payments failed, please try again later',
+        500
+      );
+      return next(error);
+    }
+    // if (!payments || payments.length === 0) {
+    if (!userWithPayments || userWithPayments.payments.length === 0) {
+      return next(
+        new HttpError('Could not find payments for the provided user id.', 404)
+      );
+    }
+  
+    res.json({
+      payments: userWithPayments.payments.map(payment =>
+        payment.toObject({ getters: true })
+      )
+    });
+}
+
+
+
 exports.createCustomer =  createCustomer;
 exports.customerLogin = customerLogin;
 exports.updateCustomerPassword = updateCustomerPassword; 
@@ -483,4 +514,4 @@ exports.forgetCustomerPassword = forgetCustomerPassword;
 exports.newPasswordReset = newPasswordReset;
 exports.getProfileDetails = getProfileDetails;
 exports.payToMerchant = payToMerchant;
-
+exports.getListofPayments = getListofPayments;

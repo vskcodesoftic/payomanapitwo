@@ -58,4 +58,6 @@ router.post('/profile' , multiFileUpload.fields([{
 //get full merchant details 
 router.get('/completeProfile',checkAuth ,merchantController.getCompleteMerchantDetails);
 
+router.get('/getListOfPayments', checkAuth ,merchantController.getListofPayments);
+
 module.exports = router;

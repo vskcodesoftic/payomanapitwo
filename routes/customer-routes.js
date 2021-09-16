@@ -50,4 +50,7 @@ router.get('/profile', checkAuth ,customerController.getProfileDetails);
 
 router.post('/payToMerchant' , checkAuth ,customerController.payToMerchant);
 
+router.get('/getListOfPayments', checkAuth ,customerController.getListofPayments);
+
+
 module.exports = router;
