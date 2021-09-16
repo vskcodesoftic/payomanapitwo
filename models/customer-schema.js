@@ -9,6 +9,7 @@ const customerSchema = new Schema({
     password: { type: String , required: true},
     profilePic :{type: String },
     pin : {type :Number, required : true },
+    payments: [{ type: mongoose.Types.ObjectId,  ref: 'Payment'}],
     countryCode : {type : Number, required : true},
     phoneNumber : { type : Number, required : true},
     resetToken:{ type:String },

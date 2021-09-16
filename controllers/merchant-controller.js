@@ -38,6 +38,20 @@ const createMerchant = async (req, res, next) => {
         return next(error)
     }
   
+
+         
+    let existingPhoneNum
+    try{
+         existingPhoneNum = await Merchant.findOne({ phoneNumber : phoneNumber })
+    }
+    catch(err){
+        const error = await new HttpError("something went wrong,creating a user failed",500)
+        return next(error)
+    }
+    if(existingPhoneNum){
+        const error = new HttpError("Phone number already exists",422)
+        return next(error)
+    }
     
     let hashedPassword;
   
@@ -491,6 +505,9 @@ const getCompleteMerchantDetails = async (req, res, next) => {
         const error = new HttpError("user not exists",422)
         return next(error)
     }
+
+   
+
     res.json({ message : " complete details of merchant", name : merchant.name, email : merchant.email , businessName : merchant.businessName, countryCode : merchant.countryCode , phoneNumber : merchant.phoneNumber , accountNumber : merchant.accountNumber, swiftCode :merchant.swiftCode ,bankName : merchant.bankName , profilePic : merchant.profilePic})
 }
 

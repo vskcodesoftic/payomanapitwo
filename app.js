@@ -10,6 +10,7 @@ const homepageRoutes = require('./routes/home-routes')
 
 const path = require('path'); 
 
+const cors = require('cors')
 
 //customerPageRoutes
 const merchantPageRoutes = require('./routes/merchant-routes')
@@ -17,6 +18,9 @@ const merchantPageRoutes = require('./routes/merchant-routes')
 const customerPageRoutes = require('./routes/customer-routes')
 
 const app = express();
+
+app.use(cors())
+
 
 //body parsing jsonData
 app.use(bodyParser.json())

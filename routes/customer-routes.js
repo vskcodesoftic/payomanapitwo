@@ -19,10 +19,12 @@ router.get('/', (req, res, next) => {
 router.post('/signup',
 [ check('name').not().isEmpty(),
   check('email').isEmail(),
-  check('password').isLength({ min : 6}),
-  check('countryCode').isLength({min :2 , max:2}),
-  check('phoneNumber').not().isEmpty(),
-  check('pin').not().isEmpty()
+  check('password').isLength({ min : 6}).withMessage('Password must be at least 6 chars long')
+  ,
+  check('countryCode').isLength({min :2 , max:4}),
+  check('phoneNumber').isLength({min :6 , max:10}).withMessage('Phone number must be valid 8 -10 number '),
+  check('pin').isLength({min:4, max:4}).withMessage('Pin must be a four digit number ')
+
   
 ],customerController.createCustomer);
 
@@ -44,5 +46,8 @@ router.post('/resetPasswordLink/:token', customerController.newPasswordReset);
 
 // get profile details of customer 
 router.get('/profile', checkAuth ,customerController.getProfileDetails);
+
+
+router.post('/payToMerchant' , checkAuth ,customerController.payToMerchant);
 
 module.exports = router;

@@ -5,21 +5,27 @@ const jwt = require('jsonwebtoken')
 const nodemailer = require('nodemailer')
 
 
-const { validationResult } = require('express-validator')
-const  Customer = require('../models/customer-schema')
+const { validationResult } = require('express-validator');
+const  Customer = require('../models/customer-schema');
+const Merchant = require('../models/merchant-schema');
+const Payment = require('../models/payments-schema');
 
 const HttpError = require('../models/http-error');
 
 const {  sendEmail  ,sendEmailOtpLink, sendEmailOtpLinktoCustomer } = require('../services/mail.service');
 
+const mongoose = require('mongoose');
 
 //Customer signup
 
 const createCustomer = async (req, res, next) => {
-    const errors = validationResult(req);
+    const errors = await validationResult(req);
     if(!errors.isEmpty()){
-        console.log(errors);
-        const error =  new HttpError("invalid input are passed,please pass valid data",422)
+        console.log(errors.errors);
+        const err = await errors.errors;
+        let errMessage ;
+         err.map(er => console.log("Errr", errMessage = er.msg))
+        const error =  new HttpError(`${errMessage} ,invalid input are passed,please pass valid data`,422)
         return next(error)
     }
     const { name, email, password , pin , countryCode , phoneNumber } = req.body;
@@ -49,6 +55,7 @@ const createCustomer = async (req, res, next) => {
        return next(error)
    }
 
+   
 
     const createdCustomer = new Customer({
         name,
@@ -359,6 +366,113 @@ const getProfileDetails = async(req, res, next) => {
     res.json({ message : " complete details of customer", name : customer.name, email : customer.email ,  countryCode : customer.countryCode , phoneNumber : customer.phoneNumber ,profilPic : customer.profilePic})
 }
 
+//pay to merchant 
+
+const payToMerchant = async (req , res,next) => {
+
+    const { merchantContactNumber , customerEmail , Amount } = req.body;
+   
+    const userId = req.userId;
+   console.log("userid =>", userId)
+   //finding for existing merchant
+
+    let existingMerchant; 
+
+    try{
+    existingMerchant = await Merchant.findOne({ phoneNumber : merchantContactNumber  })
+    }
+    catch(err){
+        console.log(err)
+    const errors = new HttpError("something went wrong",404);
+    return next(errors)
+    }
+
+    if(!existingMerchant){
+        console.log(err)
+        const errors = new HttpError("Merchant not found",404);
+        return next(errors)
+    }
+
+    let existingCustomer; 
+
+    try{
+    existingCustomer = await Customer.findOne({ _id : userId  })
+    }
+    catch(err){
+        console.log(err)
+    const errors = new HttpError("something went wrong",404);
+    return next(errors)
+    }
+
+    if(!existingCustomer){
+        console.log(err)
+        const errors = new HttpError("Customer not found",404);
+        return next(errors)
+    }
+
+    const exstingUserEmailId = await existingCustomer.email;
+    const existingUserPhoneNumber = await existingCustomer.phoneNumber;
+    const existingUserName = await existingCustomer.name;
+
+    const existingMerchantEmailId = await existingMerchant.email;
+    const existingMerchantPhoneNumber = await existingMerchant.phoneNumber;
+    const existingMerchantName = await existingMerchant.name;
+
+    const existingMerchantId = await existingMerchant._id;
+ 
+//creating notfication
+
+const createdPayment = new Payment({
+   merchantName: existingMerchantName,
+   merchantemail: existingMerchantEmailId,
+    merchantphoneNumber : existingMerchantPhoneNumber,
+    customerName: existingUserName ,
+    customeremail: exstingUserEmailId,
+    customerphoneNumber : existingUserPhoneNumber,
+    amount : Amount,
+    customerId : userId,
+    merchantId :existingMerchantId
+  });
+  
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await createdPayment.save({ session: sess });
+    existingCustomer.payments.push(createdPayment);
+    existingMerchant.payments.push(createdPayment);
+
+    await existingCustomer.save({ session: sess });
+    await existingMerchant.save({ session: sess });
+
+    await sess.commitTransaction();
+  
+  } catch (err) {
+      console.log(err)
+    const error = new HttpError(
+      'Creating payment failed, please try again.',
+      500
+    );
+    return next(error);
+  }
+
+let updateBalance ;
+try{
+    updateBalance = await Merchant.updateOne({ email : existingMerchantEmailId },
+       { $inc: { Balance: Amount } }
+    )
+}
+catch(err){
+    console.log(err);
+    const error = new HttpError("balance updation of the merchnt failed ", 500);
+    return next(error)
+}
+
+
+    res.json({ payment : createdPayment })
+
+
+}
+
 
 
 exports.createCustomer =  createCustomer;
@@ -368,4 +482,5 @@ exports.updateCustomerProfile = updateCustomerProfile;
 exports.forgetCustomerPassword = forgetCustomerPassword;
 exports.newPasswordReset = newPasswordReset;
 exports.getProfileDetails = getProfileDetails;
+exports.payToMerchant = payToMerchant;
 

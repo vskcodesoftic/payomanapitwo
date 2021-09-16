@@ -9,14 +9,16 @@ const merchantSchema = new Schema({
     password: { type: String , required: true},
     businessName :{ type :String, required : true },
     countryCode : {type :Number, required : true},
-    phoneNumber : { type : Number, required : true},
+    phoneNumber : { type : Number, required : true ,  unique : true},
     resetToken:{ type:String },
     expireToken:{ type:Date },
     profilePic :{type:String}  ,
     accountNumber :{type :Number} ,
     bankName : { type: String },
     swiftCode : { type : String },
-    Balance :{ type :Number, default: '00'}
+    Balance :{ type :Number, default: '00'},
+    payments: [{ type: mongoose.Types.ObjectId,  ref: 'Payment'}],
+
 }, { versionKey: false });
 
 merchantSchema.plugin(uniqueValidator)
