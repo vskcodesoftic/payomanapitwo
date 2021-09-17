@@ -362,7 +362,7 @@ const bankDetails = async(req,res,next) => {
 
 //showing remaing Balance of Merchant
 const getRemainingBalance = async(req,res ,next) => {
-    const userId = req.userData.userId;
+    const userId = req.userId;
     let merchant
     try{
          merchant = await Merchant.findOne({ _id : userId  })

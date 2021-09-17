@@ -266,23 +266,27 @@ const updateCustomerProfile = async (req,res,next) => {
     const userImage =  await existingUser.profilePic;
     console.log(userImage)
     
-    if(!userImage){
-        const error = new Error("please single choose files");
+  
+    if(!fileSingle && typeof userImage == 'undefined'){
+        const error = new HttpError("Please choose image",400)
         return next(error)
-      }
-
-      if(!fileSingle) {
+       }
+    
+      if(!fileSingle && userImage !== 'undefined' ){
         SingleFilePath = userImage
-      }
-
-      if(fileSingle) {
-
-      fileSingle.forEach(img => {
-        console.log(img.path)
-         imgPath = img.path;
-         SingleFilePath = imgPath
-      })
     }
+    
+      
+       
+          if(fileSingle) {
+    
+          fileSingle.forEach(img => {
+            console.log(img.path)
+             imgPath = img.path;
+             SingleFilePath = imgPath
+          })
+        }
+        
       //updating
       let user
       try {
@@ -386,7 +390,7 @@ const newPasswordReset = async(req,res,next) => {
 
 //get profile details of customer
 const getProfileDetails = async(req, res, next) => {
-    const userId = req.userData.userId;
+    const userId = req.userId;
     let customer
     try{
          customer = await Customer.findOne({ _id : userId })
