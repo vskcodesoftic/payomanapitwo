@@ -433,22 +433,25 @@ const updateMerchantProfile = async (req,res,next) => {
         return next(error)
     }
     if(!existingUser){
-        const error = new HttpError("usver not exists",422)
+        const error = new HttpError("user not exists",422)
         return next(error)
     }
 
     const userImage =  await existingUser.profilePic;
     console.log(userImage)
     
-    if(!userImage){
-        const error = new Error("please single choose files");
-        return next(error)
-      }
 
-      if(!fileSingle) {
-        SingleFilePath = userImage
-      }
+   if(!fileSingle && typeof userImage == 'undefined'){
+    const error = new HttpError("Please choose image",400)
+    return next(error)
+   }
 
+  if(!fileSingle && userImage !== 'undefined' ){
+    SingleFilePath = userImage
+}
+
+  
+   
       if(fileSingle) {
 
       fileSingle.forEach(img => {

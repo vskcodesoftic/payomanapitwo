@@ -102,7 +102,7 @@ const createCustomer = async (req, res, next) => {
 }
 
 
-//Customer login 
+//Customer login
 const  customerLogin = async(req, res, next) => {
     const errors = validationResult(req);
     if(!errors.isEmpty()){
@@ -233,12 +233,26 @@ catch(err){
 
 
 //update customer Profile
-const updateCustomerProfile = async(req, res, next) => {    
-     const userId = req.userData.userId;
+const updateCustomerProfile = async (req,res,next) => {
+    let SingleFilePath ;
+    let imgPath ;
+    console.log("image work", "image")
+
+    const fileSingle = req.files.image;
+    console.log(fileSingle)
+  
+
+    //const userEmail = req.params.id;
+
+    // const userId = req.userId;
+   // console.log("userid",userId)
+    const { accountNumber, bankName,businessName, name ,swiftCode  , email ,phoneNumber } = req.body;
+    
+    console.log("gmail", email)
 
     let existingUser
     try{
-         existingUser = await Customer.findOne({ _id : userId })
+         existingUser = await Customer.findOne({ email: email })
     }
     catch(err){
         const error = await new HttpError("something went wrong, updating failed",500)
@@ -249,13 +263,36 @@ const updateCustomerProfile = async(req, res, next) => {
         return next(error)
     }
 
-      //updating customer profile pic
+    const userImage =  await existingUser.profilePic;
+    console.log(userImage)
+    
+    if(!userImage){
+        const error = new Error("please single choose files");
+        return next(error)
+      }
+
+      if(!fileSingle) {
+        SingleFilePath = userImage
+      }
+
+      if(fileSingle) {
+
+      fileSingle.forEach(img => {
+        console.log(img.path)
+         imgPath = img.path;
+         SingleFilePath = imgPath
+      })
+    }
+      //updating
       let user
       try {
        user = await Customer.updateOne(
-          { _id: userId },
+          { email: email },
           {
-            profilePic : req.file.path 
+           
+            name,
+            phoneNumber,
+            profilePic : SingleFilePath
           }
         );
       }
@@ -265,15 +302,14 @@ const updateCustomerProfile = async(req, res, next) => {
           return next(error)
         }
         if(!user){
-          const error = new HttpError("customer not found could not update profile details",401)
+          const error = new HttpError("Customer not found could not update profile details",401)
           return next(error)
         }
 
  res.json({message :" profile updated "})
 
-
+   
 }
-
 
 
 //forget Customer Password   sending email with reset password Link
@@ -368,12 +404,11 @@ const getProfileDetails = async(req, res, next) => {
 
 //pay to merchant 
 
-const payToMerchant = async (req , res,next) => {
+const payToMerchant = async (req , res, next) => {
 
     const { merchantContactNumber , customerEmail , Amount } = req.body;
    
     const userId = req.userId;
-   console.log("userid =>", userId)
    //finding for existing merchant
 
     let existingMerchant; 
@@ -387,10 +422,11 @@ const payToMerchant = async (req , res,next) => {
     return next(errors)
     }
 
+ console.log("ex",merchantContactNumber)
+
     if(!existingMerchant){
-        console.log(err)
-        const errors = new HttpError("Merchant not found",404);
-        return next(errors)
+        const error = new HttpError("Merchant not found",404);
+        return next(error)
     }
 
     let existingCustomer; 
@@ -505,6 +541,26 @@ const getListofPayments = async (req , res ,next) => {
 }
 
 
+// get complete merchant details 
+const getCompleteCustomerDetails = async (req, res, next) => {
+    const userId = req.userId;
+ 
+     let customer
+     try{
+          customer = await Customer.findOne({ _id : userId }).select("-password -pin")
+     }
+     catch(err){
+         const error = await new HttpError("something went wrong, updating failed",500)
+         return next(error)
+     }
+     if(!customer){
+         const error = new HttpError("user not exists",422)
+         return next(error)
+     }
+ 
+    res.json({ customer : customer })
+ 
+ }
 
 exports.createCustomer =  createCustomer;
 exports.customerLogin = customerLogin;
@@ -515,3 +571,4 @@ exports.newPasswordReset = newPasswordReset;
 exports.getProfileDetails = getProfileDetails;
 exports.payToMerchant = payToMerchant;
 exports.getListofPayments = getListofPayments;
+exports.getCompleteCustomerDetails = getCompleteCustomerDetails;

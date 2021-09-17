@@ -9,6 +9,9 @@ const checkAuth = require('../middleware/authService');
 
 const fileUpload = require('../middleware/fileUpload');
 
+const multiFileUpload = require('../middleware/multiFile-upload');
+
+
 router.get('/', (req, res, next) => {
  
   res.json({message: 'customer page routes'});
@@ -36,7 +39,9 @@ router.post('/login' ,[ check('email').isEmail(), check('password').not().isEmpt
 router.post('/updatePassword'  ,[ check('email').isEmail(), check('oldpassword').not().isEmpty(),check('newpassword').not().isEmpty()], customerController.updateCustomerPassword)
 
 //update Profile (picture)
- router.post('/profile', checkAuth , fileUpload.single('profilePic'), customerController.updateCustomerProfile);
+ router.post('/profile',  multiFileUpload.fields([{
+  name: 'image', maxCount: 1
+}]), customerController.updateCustomerProfile);
 
 //Forget Customer Password
 router.post('/forgetPassword' ,[ check('email').isEmail()], customerController.forgetCustomerPassword);
@@ -52,5 +57,7 @@ router.post('/payToMerchant' , checkAuth ,customerController.payToMerchant);
 
 router.get('/getListOfPayments', checkAuth ,customerController.getListofPayments);
 
+router.get('/getCompleteProfile', checkAuth ,customerController.getCompleteCustomerDetails);
 
-module.exports = router;
+
+module.exports = router

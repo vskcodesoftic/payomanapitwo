@@ -19,8 +19,9 @@ const customerPageRoutes = require('./routes/customer-routes')
 
 const app = express();
 
-app.use(cors())
-
+app.use(cors({
+  origin: 'http://localhost:3000',
+}))
 
 //body parsing jsonData
 app.use(bodyParser.json())
