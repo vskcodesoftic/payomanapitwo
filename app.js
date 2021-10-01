@@ -19,13 +19,18 @@ const customerPageRoutes = require('./routes/customer-routes')
 
 const app = express();
 
-app.use(cors({
-  origin: ['http://localhost:3000','http://localhost:3001']
-}))
+const ejs = require("ejs");
+
+app.use(cors())
+//ejs
+app.set('view engine', 'ejs');
 
 //body parsing jsonData
 app.use(bodyParser.json())
 //routes
+
+//static serving
+app.use(express.static('public'));
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
